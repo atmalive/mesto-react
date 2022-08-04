@@ -21,7 +21,7 @@ export function Main(props) {
     React.useEffect( () => {
         Promise.all([api.getUserInfo(), api.getInitialCards()])
             .then(([userData, cardsItems]) => {
-                const {name, about, avatar, _id} = userData;
+                const {name, about, avatar} = userData;
                 setUserName(name)
                 setUserDescription(about)
                 setUserAvatar(avatar)
