@@ -1,5 +1,5 @@
 export function ImagePopup({card, onClose}) {
-    const {name, link} = card;
+    const {name, link} = card || {};
     return (
         <div className={`popup popup_type_img ${card && "popup_open"}`}>
             <figure className="popup__figure">
