@@ -6,6 +6,10 @@ export function AddPlacePopup({ isOpen, onAddPlace, handleClose, isButtonBlocked
     const [ name, setName ] = React.useState('')
     const [ link, setLink ] = React.useState('')
 
+    React.useEffect(() => {
+        setName('');
+        setLink('');
+    }, [isOpen]);
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -13,8 +17,6 @@ export function AddPlacePopup({ isOpen, onAddPlace, handleClose, isButtonBlocked
             name,
             link
         );
-        setName('')
-        setLink('')
     }
 
     return (

@@ -1,15 +1,14 @@
-import React, {useContext, useEffect, useState} from 'react'
+import React, { useEffect, useState} from 'react'
 import { CurrentUserContext } from "../contexts/CurrentUserContext";
-import {api} from "../utils/Api";
+import { api } from "../utils/Api";
 import {Header} from './Header'
 import {Main} from './Main'
 import {Footer} from './Footer'
 import {ImagePopup} from "./ImagePopup";
-import {PopupWithForm} from "./PopupWithForm";
 import {EditProfilePopup} from "./EditProfilePopup";
 import {EditAvatarPopup} from "./EditAvatarPopup";
 import {AddPlacePopup} from "./AddPlacePopup";
-
+// Ощибок нигде в консоли нет
 export default function App() {
 
     const [isEditProfilePopupOpen, setIsEditProfilePopupOpen] = useState(false);
@@ -42,7 +41,10 @@ export default function App() {
         api.changeLikeCardStatus(card._id, isLiked)
             .then((newCard) => {
                 setCards((state) => state.map((c) => c._id === card._id ? newCard : c));
-            });
+            })
+            .catch(err => {
+                console.log(err);
+            })
     }
 
     const handleCardDelete = (card) => {
@@ -50,6 +52,9 @@ export default function App() {
             .then(() => {
                 const newArr = cards.filter( (cardItem) => cardItem._id !== card._id)
                 setCards(newArr)
+            })
+            .catch(err => {
+                console.log(err);
             })
     }
 
@@ -73,6 +78,9 @@ export default function App() {
             setCurrentUser(data)
             closeAllPopups()
         })
+            .catch(err => {
+                console.log(err);
+            })
             .finally(() => {
                 setIsButtonBlocked(false)
             })
@@ -84,6 +92,9 @@ export default function App() {
             .then((data) => {
                 setCurrentUser(data)
                 closeAllPopups()
+            })
+            .catch(err => {
+                console.log(err);
             })
             .finally(() => {
                 setIsButtonBlocked(false)
@@ -103,6 +114,9 @@ export default function App() {
               .then((data) => {
                   setCards([data, ...cards]);
                   closeAllPopups()
+              })
+              .catch(err => {
+                  console.log(err);
               })
               .finally(() => {
                   setIsButtonBlocked(false)
