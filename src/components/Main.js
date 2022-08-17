@@ -1,5 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react'
-import {api} from '../utils/Api';
+import React, { useContext } from 'react'
 import {Card} from "./Card";
 import {CurrentUserContext} from "../contexts/CurrentUserContext";
 
@@ -7,39 +6,13 @@ export function Main(props) {
     const {onEditProfile,
         onAddPlace,
         onEditAvatar,
-        handleCardClick} = props
-
+        handleCardClick,
+        cards,
+        onCardLike,
+        onCardDelete
+    } = props
     const currentUserContext = useContext(CurrentUserContext)
-    const { about, name, avatar, _id } = currentUserContext || {};
-    const [cards, setCards] = useState([]);
-
-    useEffect( () => {
-        api.getInitialCards()
-            .then((cardsItems) => {
-                setCards(cardsItems)
-            })
-            .catch(err => {
-                console.log(err);
-            });
-    }, [])
-
-    const handleCardLike = (card) => {
-        const isLiked = card.likes.some( card => card._id === _id)
-
-        api.changeLikeCardStatus(card._id, isLiked)
-            .then((newCard) => {
-                setCards((state) => state.map((c) => c._id === card._id ? newCard : c));
-            });
-    }
-
-    const handleCardDelete = (card) => {
-        console.log(card)
-        api.deleteCard(card._id)
-            .then(() => {
-                const newArr = cards.filter( (cardItem) => cardItem._id !== card._id)
-                setCards(newArr)
-            })
-    }
+    const { about, name, avatar } = currentUserContext || {};
 
     return (
         <>
@@ -58,7 +31,7 @@ export function Main(props) {
                 </section>
                 <section className="elements">
                     {cards.map( (card) => {
-                          return <Card onCardDelete={handleCardDelete} onCardLike={handleCardLike} key={card._id} card={card} handleCardClick={handleCardClick}/>
+                          return <Card  card={card} onCardDelete={onCardDelete} onCardLike={onCardLike} key={card._id} handleCardClick={handleCardClick}/>
                     })}
                 </section>
             </main>

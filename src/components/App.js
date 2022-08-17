@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react'
+import React, {useContext, useEffect, useState} from 'react'
 import { CurrentUserContext } from "../contexts/CurrentUserContext";
 import {api} from "../utils/Api";
 import {Header} from './Header'
@@ -8,6 +8,7 @@ import {ImagePopup} from "./ImagePopup";
 import {PopupWithForm} from "./PopupWithForm";
 import {EditProfilePopup} from "./EditProfilePopup";
 import {EditAvatarPopup} from "./EditAvatarPopup";
+import {AddPlacePopup} from "./AddPlacePopup";
 
 export default function App() {
 
@@ -17,8 +18,9 @@ export default function App() {
     const [selectedCard, setSelectedCard] = useState(null);
     const [currentUser, setCurrentUser ] = useState();
     const [isButtonBlocked, setIsButtonBlocked] = useState(false);
+    const [cards, setCards] = useState([]);
 
-    useEffect( () => {
+      useEffect( () => {
         api.getUserInfo()
             .then((userInfo) => {
                 setCurrentUser(userInfo)
@@ -26,7 +28,30 @@ export default function App() {
             .catch(err => {
                 console.log(err);
             });
+        api.getInitialCards()
+            .then((cardsItems) => {
+                setCards(cardsItems)
+            })
+            .catch(err => {
+                console.log(err);
+            });
     }, [])
+
+    const handleCardLike = (card) => {
+        const isLiked = card.likes.some( card => card._id === currentUser._id)
+        api.changeLikeCardStatus(card._id, isLiked)
+            .then((newCard) => {
+                setCards((state) => state.map((c) => c._id === card._id ? newCard : c));
+            });
+    }
+
+    const handleCardDelete = (card) => {
+        api.deleteCard(card._id)
+            .then(() => {
+                const newArr = cards.filter( (cardItem) => cardItem._id !== card._id)
+                setCards(newArr)
+            })
+    }
 
     const handleEditProfileClick = () => {
         setIsEditProfilePopupOpen(true)
@@ -54,7 +79,6 @@ export default function App() {
     }
 
     const handleUpdateAvatar = ({avatar}) => {
-        console.log(avatar)
         setIsButtonBlocked(true)
         api.updateAvatar(avatar)
             .then((data) => {
@@ -73,11 +97,27 @@ export default function App() {
         setSelectedCard(null)
     }
 
+    const handleAddPlaceSubmit = (name, link) => {
+        setIsButtonBlocked(true)
+          api.addCard(name,link)
+              .then((data) => {
+                  setCards([data, ...cards]);
+                  closeAllPopups()
+              })
+              .finally(() => {
+                  setIsButtonBlocked(false)
+              })
+
+    }
+
   return (
       <CurrentUserContext.Provider value={currentUser}>
           <div className="page">
               <Header />
               <Main
+                  cards={cards}
+                  onCardLike={handleCardLike}
+                  onCardDelete={handleCardDelete}
                   onEditProfile={handleEditProfileClick}
                   onEditAvatar={handleEditAvatarClick}
                   onAddPlace ={handleAddPlaceClick}
@@ -88,37 +128,10 @@ export default function App() {
                   handleCardClick={handleCardClick}
               />
               <Footer />
-
               <ImagePopup card={selectedCard} onClose={closeAllPopups} />
-              <EditProfilePopup isButtonBlocked={isButtonBlocked} onUpdateUser={handleUpdateUser} isOpen={isEditProfilePopupOpen} handleClose={closeAllPopups}/>
+              <EditProfilePopup isButtonBlocked={isButtonBlocked} onUpdateUser={handleUpdateUser} isOpen={isEditProfilePopupOpen} handleClose={closeAllPopups} />
               <EditAvatarPopup isButtonBlocked={isButtonBlocked} onUpdateAvatar={handleUpdateAvatar} isOpen={isEditAvatarPopupOpen} handleClose={closeAllPopups} />
-
-
-              <PopupWithForm title={'Новое место'} name={'card'} isOpen={isAddPlacePopupOpen} handleClose={closeAllPopups}>
-                  <label className="popup__label">
-                      <input
-                          className="popup__input popup__input_mesto popup__input_mesto_name"
-                          name="submitCardName"
-                          placeholder="Название"
-                          type="text" required
-                          minLength="2"
-                          maxLength="30"
-                          id="input-mesto-name"/>
-                      <span className="popup__input-error input-mesto-name-error"></span>
-                  </label>
-                  <label className="popup__label">
-                      <input
-                          className="popup__input popup__input_mesto popup__input_mesto_link"
-                          name="submitCardLink"
-                          placeholder="Ссылка на картинку"
-                          type="url" required
-                          id="input-mesto-link"/>
-                      <span className="popup__input-error input-mesto-link-error"></span>
-                  </label>
-              </PopupWithForm>
-
-
-
+              <AddPlacePopup  isButtonBlocked={isButtonBlocked} onAddPlace={handleAddPlaceSubmit} isOpen={isAddPlacePopupOpen} handleClose={closeAllPopups} />
           </div>
       </CurrentUserContext.Provider>
 

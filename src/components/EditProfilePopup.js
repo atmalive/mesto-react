@@ -3,7 +3,6 @@ import React, {useContext} from "react";
 import {CurrentUserContext} from "../contexts/CurrentUserContext";
 
 export function EditProfilePopup({isOpen, handleClose, onUpdateUser, isButtonBlocked}) {
-
     const user = useContext(CurrentUserContext)
     const [ name, setName ] = React.useState('');
     const [ description , setDescription ] = React.useState('');
@@ -22,9 +21,7 @@ export function EditProfilePopup({isOpen, handleClose, onUpdateUser, isButtonBlo
             name,
             about: description,
         });
-
     }
-
 
    return(
            <PopupWithForm isButtonBlocked={isButtonBlocked} onSubmit={handleSubmit} title={'Редактировать профиль'} name={'info'} isOpen={isOpen} handleClose={handleClose}>
