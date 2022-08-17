@@ -1,17 +1,32 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react'
+import { CurrentUserContext } from "../contexts/CurrentUserContext";
+import {api} from "../utils/Api";
 import {Header} from './Header'
 import {Main} from './Main'
 import {Footer} from './Footer'
 import {ImagePopup} from "./ImagePopup";
 import {PopupWithForm} from "./PopupWithForm";
-
+import {EditProfilePopup} from "./EditProfilePopup";
+import {EditAvatarPopup} from "./EditAvatarPopup";
 
 export default function App() {
 
-    const [isEditProfilePopupOpen, setIsEditProfilePopupOpen] = React.useState(false);
-    const [isAddPlacePopupOpen, setIsAddPlacePopupOpen] = React.useState(false);
-    const [isEditAvatarPopupOpen, setIsEditAvatarPopupOpen] = React.useState(false);
-    const [selectedCard, setSelectedCard] = React.useState(null);
+    const [isEditProfilePopupOpen, setIsEditProfilePopupOpen] = useState(false);
+    const [isAddPlacePopupOpen, setIsAddPlacePopupOpen] = useState(false);
+    const [isEditAvatarPopupOpen, setIsEditAvatarPopupOpen] = useState(false);
+    const [selectedCard, setSelectedCard] = useState(null);
+    const [currentUser, setCurrentUser ] = useState();
+    const [isButtonBlocked, setIsButtonBlocked] = useState(false);
+
+    useEffect( () => {
+        api.getUserInfo()
+            .then((userInfo) => {
+                setCurrentUser(userInfo)
+            })
+            .catch(err => {
+                console.log(err);
+            });
+    }, [])
 
     const handleEditProfileClick = () => {
         setIsEditProfilePopupOpen(true)
@@ -26,6 +41,31 @@ export default function App() {
         setSelectedCard(card)
     }
 
+    const handleUpdateUser = ({name, about}) => {
+        setIsButtonBlocked(true)
+        api.updateUserInfo(name, about)
+        .then((data) => {
+            setCurrentUser(data)
+            closeAllPopups()
+        })
+            .finally(() => {
+                setIsButtonBlocked(false)
+            })
+    }
+
+    const handleUpdateAvatar = ({avatar}) => {
+        console.log(avatar)
+        setIsButtonBlocked(true)
+        api.updateAvatar(avatar)
+            .then((data) => {
+                setCurrentUser(data)
+                closeAllPopups()
+            })
+            .finally(() => {
+                setIsButtonBlocked(false)
+            })
+    }
+
     const closeAllPopups = () => {
         setIsEditProfilePopupOpen(false)
         setIsEditAvatarPopupOpen(false)
@@ -34,7 +74,8 @@ export default function App() {
     }
 
   return (
-      <div className="page">
+      <CurrentUserContext.Provider value={currentUser}>
+          <div className="page">
               <Header />
               <Main
                   onEditProfile={handleEditProfileClick}
@@ -48,67 +89,38 @@ export default function App() {
               />
               <Footer />
 
-          <ImagePopup card={selectedCard} onClose={closeAllPopups} />
+              <ImagePopup card={selectedCard} onClose={closeAllPopups} />
+              <EditProfilePopup isButtonBlocked={isButtonBlocked} onUpdateUser={handleUpdateUser} isOpen={isEditProfilePopupOpen} handleClose={closeAllPopups}/>
+              <EditAvatarPopup isButtonBlocked={isButtonBlocked} onUpdateAvatar={handleUpdateAvatar} isOpen={isEditAvatarPopupOpen} handleClose={closeAllPopups} />
 
-          <PopupWithForm title={'Редактировать профиль'} name={'info'} isOpen={isEditProfilePopupOpen} handleClose={closeAllPopups}>
-              <label className="popup__label">
-                  <input
-                      className="popup__input popup__input_type_name"
-                      name="submitPopupName"
-                      placeholder="Имя"
-                      type="text" required
-                      minLength="2"
-                      maxLength="40"
-                      id="input-profile-name"/>
-                  <span className="popup__input-error input-profile-name-error"></span>
-              </label>
-              <label className="popup__label">
-                  <input
-                      className="popup__input popup__input_type_job"
-                      name="submitPopupJob"
-                      placeholder="Занятие"
-                      type="text" required
-                      minLength="2"
-                      maxLength="200"
-                      id="input-profile-description"/>
-                  <span className="popup__input-error input-profile-description-error"></span>
-              </label>
-          </PopupWithForm>
 
-          <PopupWithForm title={'Новое место'} name={'card'} isOpen={isAddPlacePopupOpen} handleClose={closeAllPopups}>
-              <label className="popup__label">
-                  <input
-                      className="popup__input popup__input_mesto popup__input_mesto_name"
-                      name="submitCardName"
-                      placeholder="Название"
-                      type="text" required
-                      minLength="2"
-                      maxLength="30"
-                      id="input-mesto-name"/>
-                  <span className="popup__input-error input-mesto-name-error"></span>
-              </label>
-              <label className="popup__label">
-                  <input
-                      className="popup__input popup__input_mesto popup__input_mesto_link"
-                      name="submitCardLink"
-                      placeholder="Ссылка на картинку"
-                      type="url" required
-                      id="input-mesto-link"/>
-                  <span className="popup__input-error input-mesto-link-error"></span>
-              </label>
-          </PopupWithForm>
+              <PopupWithForm title={'Новое место'} name={'card'} isOpen={isAddPlacePopupOpen} handleClose={closeAllPopups}>
+                  <label className="popup__label">
+                      <input
+                          className="popup__input popup__input_mesto popup__input_mesto_name"
+                          name="submitCardName"
+                          placeholder="Название"
+                          type="text" required
+                          minLength="2"
+                          maxLength="30"
+                          id="input-mesto-name"/>
+                      <span className="popup__input-error input-mesto-name-error"></span>
+                  </label>
+                  <label className="popup__label">
+                      <input
+                          className="popup__input popup__input_mesto popup__input_mesto_link"
+                          name="submitCardLink"
+                          placeholder="Ссылка на картинку"
+                          type="url" required
+                          id="input-mesto-link"/>
+                      <span className="popup__input-error input-mesto-link-error"></span>
+                  </label>
+              </PopupWithForm>
 
-          <PopupWithForm title={'Обновить аватар'} name={'avatar'} isOpen={isEditAvatarPopupOpen} handleClose={closeAllPopups}>
-              <label className="popup__label">
-                  <input
-                      className="popup__input popup__input_avatar popup__input_avatar_link"
-                      name="submitAvatarLink"
-                      placeholder="Ссылка на картинку"
-                      type="url" required
-                      id="input-avatar-link"/>
-                  <span className="popup__input-error input-avatar-link-error"></span>
-              </label>
-          </PopupWithForm>
-      </div>
+
+
+          </div>
+      </CurrentUserContext.Provider>
+
   );
 }

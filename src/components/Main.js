@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useContext } from 'react'
 import {api} from '../utils/Api';
 import {Card} from "./Card";
+import {CurrentUserContext} from "../contexts/CurrentUserContext";
 
 export function Main(props) {
     const {onEditProfile,
@@ -8,48 +9,57 @@ export function Main(props) {
         onEditAvatar,
         handleCardClick} = props
 
-    const [userName, setUserName] = useState('');
-    const [userDescription, setUserDescription] = useState('');
-    const [userAvatar, setUserAvatar] = useState('');
+    const currentUserContext = useContext(CurrentUserContext)
+    const { about, name, avatar, _id } = currentUserContext || {};
     const [cards, setCards] = useState([]);
 
     useEffect( () => {
-        Promise.all([api.getUserInfo(), api.getInitialCards()])
-            .then(([userData, cardsItems]) => {
-                const {name, about, avatar} = userData;
-                setUserName(name)
-                setUserDescription(about)
-                setUserAvatar(avatar)
+        api.getInitialCards()
+            .then((cardsItems) => {
                 setCards(cardsItems)
             })
             .catch(err => {
                 console.log(err);
             });
-
-
     }, [])
+
+    const handleCardLike = (card) => {
+        const isLiked = card.likes.some( card => card._id === _id)
+
+        api.changeLikeCardStatus(card._id, isLiked)
+            .then((newCard) => {
+                setCards((state) => state.map((c) => c._id === card._id ? newCard : c));
+            });
+    }
+
+    const handleCardDelete = (card) => {
+        console.log(card)
+        api.deleteCard(card._id)
+            .then(() => {
+                const newArr = cards.filter( (cardItem) => cardItem._id !== card._id)
+                setCards(newArr)
+            })
+    }
 
     return (
         <>
             <main className="main">
                 <section className="profile">
                     <div onClick={onEditAvatar}
-                         className="profile__avatar" style={{ backgroundImage: `url(${userAvatar})` }}/>
+                         className="profile__avatar" style={{ backgroundImage: `url(${avatar})` }}/>
                     <div className="profile__info">
-                        <h1 className="profile__title">{userName}</h1>
+                        <h1 className="profile__title">{name}</h1>
                         <button onClick={onEditProfile}
                             className="profile__edit-button" type="button" aria-label="edit"></button>
                     </div>
-                    <p className="profile__subtitle">{userDescription}</p>
+                    <p className="profile__subtitle">{about}</p>
                     <button onClick={onAddPlace}
                             className="profile__add-button" aria-label="add picture" type="button"></button>
                 </section>
                 <section className="elements">
                     {cards.map( (card) => {
-                        console.log(card)
-                          return <Card key={card._id} card={card} handleCardClick={handleCardClick}/>
+                          return <Card onCardDelete={handleCardDelete} onCardLike={handleCardLike} key={card._id} card={card} handleCardClick={handleCardClick}/>
                     })}
-
                 </section>
             </main>
         </>
