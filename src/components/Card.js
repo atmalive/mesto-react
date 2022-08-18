@@ -1,7 +1,7 @@
 import React, {useContext} from "react";
 import {CurrentUserContext} from "../contexts/CurrentUserContext";
 
-export function Card({card, handleCardClick, onCardLike, onCardDelete}) {
+export function Card({card, handleCardClick, onCardLike, isConfirmDeletePopupOpen, setIsConfirmDeletePopupOpen, setIsImagePopupOpen, isImagePopupOpen }) {
     const {name, link, likes} = card;
     const currentUserContext = useContext(CurrentUserContext)
     const { _id } = currentUserContext || {};
@@ -15,17 +15,19 @@ export function Card({card, handleCardClick, onCardLike, onCardDelete}) {
     );
     function handleClick() {
         handleCardClick(card);
+        setIsImagePopupOpen(!isImagePopupOpen)
     }
     function handleLikeClick() {
         onCardLike(card);
     }
-    function handleDeleteClick() {
-        onCardDelete(card);
+    function handleOpenConfirmPopup() {
+        setIsConfirmDeletePopupOpen(!isConfirmDeletePopupOpen)
+        handleCardClick(card)
     }
 
     return  (
         <div className="element">
-            <button className={cardDeleteButtonClassName} aria-label="trash" type="button" onClick={handleDeleteClick}></button>
+            <button className={cardDeleteButtonClassName} aria-label="trash" type="button" onClick={handleOpenConfirmPopup}></button>
             <img src={link} alt={name} className="element__picture" onClick={handleClick} />
             <div className="element__text-like">
                 <h2 className="element__text">{name}</h2>

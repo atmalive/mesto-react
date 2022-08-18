@@ -4,21 +4,21 @@ import React from "react";
 export function EditAvatarPopup({ isButtonBlocked, isOpen, handleClose, onUpdateAvatar}) {
 
     const [ name, setName ] = React.useState('');
-    const avatarRef = React.useRef("");
 
     const handleChange = (e) => {
         setName(e.target.value)
     }
 
+    React.useEffect(() => {
+        setName('');
+    }, [isOpen]);
+
     function handleSubmit(e) {
         e.preventDefault();
-
         onUpdateAvatar({
-            avatar: avatarRef.current.value,
+            avatar: name,
         });
     }
-
-    // console.log(avatarRef.current.value)
 
     return (
         <PopupWithForm
@@ -31,7 +31,6 @@ export function EditAvatarPopup({ isButtonBlocked, isOpen, handleClose, onUpdate
         >
             <label className="popup__label">
                 <input
-                    ref={avatarRef}
                     value={name}
                     onChange={handleChange}
                     className="popup__input popup__input_avatar popup__input_avatar_link"

@@ -9,7 +9,11 @@ export function Main(props) {
         handleCardClick,
         cards,
         onCardLike,
-        onCardDelete
+        onCardDelete,
+        isConfirmDeletePopupOpen,
+        setIsConfirmDeletePopupOpen,
+        isImagePopupOpen,
+        setIsImagePopupOpen
     } = props
     const currentUserContext = useContext(CurrentUserContext)
     const { about, name, avatar } = currentUserContext || {};
@@ -31,7 +35,17 @@ export function Main(props) {
                 </section>
                 <section className="elements">
                     {cards.map( (card) => {
-                          return <Card  card={card} onCardDelete={onCardDelete} onCardLike={onCardLike} key={card._id} handleCardClick={handleCardClick}/>
+                          return <Card
+                              setIsConfirmDeletePopupOpen={setIsConfirmDeletePopupOpen}
+                              card={card}
+                              isConfirmDeletePopupOpen={isConfirmDeletePopupOpen}
+                              onCardDelete={onCardDelete}
+                              onCardLike={onCardLike}
+                              key={card._id}
+                              handleCardClick={handleCardClick}
+                              isImagePopupOpen={isImagePopupOpen}
+                              setIsImagePopupOpen={setIsImagePopupOpen}
+                          />
                     })}
                 </section>
             </main>

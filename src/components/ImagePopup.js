@@ -1,7 +1,7 @@
-export function ImagePopup({card, onClose}) {
+export function ImagePopup({card, onClose, isImagePopupOpen}) {
     const {name, link} = card || {};
     return (
-        <div className={`popup popup_type_img ${card && "popup_open"}`}>
+        <div className={`popup popup_type_img ${isImagePopupOpen && "popup_open"}`}>
             <figure className="popup__figure">
                 <img src={link} alt={name} className="popup__img"/>
                 <figcaption className="popup__subtitle">{name}</figcaption>

@@ -8,16 +8,19 @@ import {ImagePopup} from "./ImagePopup";
 import {EditProfilePopup} from "./EditProfilePopup";
 import {EditAvatarPopup} from "./EditAvatarPopup";
 import {AddPlacePopup} from "./AddPlacePopup";
+import {ConfirmDeleteCardPopup} from "./ConfirmDeleteCardPopup";
 // Ощибок нигде в консоли нет
 export default function App() {
 
     const [isEditProfilePopupOpen, setIsEditProfilePopupOpen] = useState(false);
     const [isAddPlacePopupOpen, setIsAddPlacePopupOpen] = useState(false);
     const [isEditAvatarPopupOpen, setIsEditAvatarPopupOpen] = useState(false);
+    const [isConfirmDeletePopupOpen, setIsConfirmDeletePopupOpen] = useState(false);
     const [selectedCard, setSelectedCard] = useState(null);
     const [currentUser, setCurrentUser ] = useState();
     const [isButtonBlocked, setIsButtonBlocked] = useState(false);
     const [cards, setCards] = useState([]);
+    const [isImagePopupOpen, setIsImagePopupOpen] = React.useState(false)
 
       useEffect( () => {
         api.getUserInfo()
@@ -47,11 +50,12 @@ export default function App() {
             })
     }
 
-    const handleCardDelete = (card) => {
-        api.deleteCard(card._id)
+    const handleCardDelete = () => {
+        api.deleteCard(selectedCard._id)
             .then(() => {
-                const newArr = cards.filter( (cardItem) => cardItem._id !== card._id)
+                const newArr = cards.filter( (cardItem) => cardItem._id !== selectedCard._id)
                 setCards(newArr)
+                closeAllPopups()
             })
             .catch(err => {
                 console.log(err);
@@ -106,6 +110,8 @@ export default function App() {
         setIsEditAvatarPopupOpen(false)
         setIsAddPlacePopupOpen(false)
         setSelectedCard(null)
+        setIsImagePopupOpen(false)
+        setIsConfirmDeletePopupOpen(false)
     }
 
     const handleAddPlaceSubmit = (name, link) => {
@@ -121,7 +127,6 @@ export default function App() {
               .finally(() => {
                   setIsButtonBlocked(false)
               })
-
     }
 
   return (
@@ -140,14 +145,38 @@ export default function App() {
                   isEditAvatarPopupOpen={isEditAvatarPopupOpen}
                   closeAllPopups={closeAllPopups}
                   handleCardClick={handleCardClick}
+                  isConfirmDeletePopupOpen={isConfirmDeletePopupOpen}
+                  setIsConfirmDeletePopupOpen={setIsConfirmDeletePopupOpen}
+                  isImagePopupOpen={isImagePopupOpen}
+                  setIsImagePopupOpen={setIsImagePopupOpen}
               />
               <Footer />
-              <ImagePopup card={selectedCard} onClose={closeAllPopups} />
-              <EditProfilePopup isButtonBlocked={isButtonBlocked} onUpdateUser={handleUpdateUser} isOpen={isEditProfilePopupOpen} handleClose={closeAllPopups} />
-              <EditAvatarPopup isButtonBlocked={isButtonBlocked} onUpdateAvatar={handleUpdateAvatar} isOpen={isEditAvatarPopupOpen} handleClose={closeAllPopups} />
-              <AddPlacePopup  isButtonBlocked={isButtonBlocked} onAddPlace={handleAddPlaceSubmit} isOpen={isAddPlacePopupOpen} handleClose={closeAllPopups} />
+              <ImagePopup
+                  card={selectedCard}
+                  onClose={closeAllPopups}
+                  isImagePopupOpen={isImagePopupOpen}
+              />
+              <EditProfilePopup isButtonBlocked={isButtonBlocked}
+                                onUpdateUser={handleUpdateUser}
+                                isOpen={isEditProfilePopupOpen}
+                                handleClose={closeAllPopups}
+              />
+              <EditAvatarPopup isButtonBlocked={isButtonBlocked}
+                               onUpdateAvatar={handleUpdateAvatar}
+                               isOpen={isEditAvatarPopupOpen}
+                               handleClose={closeAllPopups}
+              />
+              <AddPlacePopup  isButtonBlocked={isButtonBlocked}
+                              onAddPlace={handleAddPlaceSubmit}
+                              isOpen={isAddPlacePopupOpen}
+                              handleClose={closeAllPopups}
+              />
+              <ConfirmDeleteCardPopup isButtonBlocked={isButtonBlocked}
+                                      isOpen={isConfirmDeletePopupOpen}
+                                      handleClose={closeAllPopups}
+                                      handleDelete={handleCardDelete}
+              />
           </div>
       </CurrentUserContext.Provider>
-
   );
 }
